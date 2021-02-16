@@ -2,7 +2,105 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@*<video id="video" width="320" height="240" controls>
+        <source src="https://www.w3schools.com/html/movie.mp4" active type="video/mp4">
+        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/ogg">
+        Your browser does not support the video tag.
+    </video>*@
+
+@*<button onclick="myFunction()" type="button">Toggle Video</button>
+    <br>*@
+
+@{
+    var list = new List<string> { "http://www.w3schools.com/html/mov_bbb.mp4", "https://www.w3schools.com/html/movie.mp4" };
+}
+
+
+<video id="myVideo" controls @*autoplay*@ @*loop*@ class="myvideo" onended="finish()">
+    <source id="mp4_src" src="@list[0]" type="video/mp4">
+</video>
+
+<button onclick="back()" id="backButton" type="button" style="visibility:hidden">Geri</button>
+<button onclick="next()" id="finishButton" type="button" disabled>İleri</button>
+
+<script>
+
+    var current = 0;
+
+    //Video bittiginde ileri butonunun disable olması kaldırılıyor
+    function finish() {
+        debugger;
+       
+        $("#finishButton").prop("disabled", false);
+    }
+
+    var video = document.getElementById('myVideo');
+    var supposedCurrentTime = 0;
+
+    video.addEventListener('timeupdate', function () {
+        if (!video.seeking) {
+            supposedCurrentTime = video.currentTime;
+        }
+    });
+
+    // prevent user from seeking
+    video.addEventListener('seeking', function () {
+        // guard agains infinite recursion:
+        // user seeks, seeking is fired, currentTime is modified, seeking is fired, current time is modified, ....
+        var delta = video.currentTime - supposedCurrentTime;
+
+        if (delta > 0.01) {
+            console.log("Seeking is disabled");
+            video.currentTime = supposedCurrentTime;
+        }
+
+    });
+    // delete the following event handler if rewind is not required
+    video.addEventListener('ended', function () {
+        // reset state in order to allow for rewind
+        supposedCurrentTime = 0;
+    });
+
+    var statusElement = document.getElementById("status");
+    var currentlyPlaying = 1;
+    var currentlPlayingTime;
+
+    var src1 = "http://www.w3schools.com/html/mov_bbb.mp4";
+
+    var src2 = "https://www.w3schools.com/html/movie.mp4";
+    var src3 = "http://techslides.com/demos/sample-videos/small.mp4";
+
+    //İleri butonu ile bir sonraki videoya geçiliyor
+    function next() {
+        debugger;
+        currentlPlayingTime = video.currentTime;
+        if (currentlyPlaying === 1) {
+            video.src = src2;
+            currentlyPlaying = 2;
+
+        }
+        //Bir sonraki videoya geçildiği için; öncekine de dönülebilir
+        $("#backButton").css('visibility', 'visible');
+        $("#finishButton").css('visibility', 'hidden');
+    }
+
+    function back() {
+        debugger;
+        currentlPlayingTime = video.currentTime;
+        if (currentlyPlaying === 2) {
+            video.src = src1;
+            currentlyPlaying = 1;
+
+        }
+        video.load();
+        video.addEventListener('loadedmetadata', function () {
+            video.currentTime = currentlPlayingTime;
+        }, false);
+        //Geri yapınca ilk videoya dönüyor;Bunun için geri butonu gizlenecek
+        $("#backButton").css('visibility', 'hidden');
+        //Videonun sonuna gelmeden ileri basılamaması için disable yaplıyor
+        $("#finishButton").css('visibility', 'visible');
+        $("#finishButton").prop("disabled", true);
+    }
+
+</script>
